@@ -1,0 +1,133 @@
+/* ============================================
+   AUTHENTICATION STYLES
+   Login & Register Pages
+   ============================================ */
+
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--primary-navy), var(--soft-gray));
+}
+
+.auth-card {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-2xl);
+    width: 100%;
+    max-width: 420px;
+    animation: fadeInScale 500ms ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.auth-header h1 {
+    margin-bottom: var(--spacing-sm);
+    font-size: 2rem;
+}
+
+.auth-header p {
+    color: var(--text-secondary);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.form-group small {
+    display: block;
+    margin-top: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.form-group input:invalid {
+    border-color: var(--danger);
+}
+
+.form-group input:valid {
+    border-color: var(--success);
+}
+
+.auth-divider {
+    text-align: center;
+    color: var(--text-secondary);
+    margin: var(--spacing-lg) 0;
+    position: relative;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.auth-divider::before {
+    left: 0;
+}
+
+.auth-divider::after {
+    right: 0;
+}
+
+.auth-footer {
+    text-align: center;
+}
+
+.auth-footer p {
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.auth-footer a {
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.auth-footer a:hover {
+    color: var(--accent-blue-dark);
+    text-decoration: underline;
+}
+
+/* Error Message Styling */
+.form-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Success Message Styling */
+.form-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+}

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - AgentCart</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+    <!-- Navbar (loaded from common.js) -->
+    <nav id="navbar"></nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <main>
+        <section class="checkout-section">
+            <div class="container">
+                <h1>Checkout</h1>
+
+                <div class="checkout-container">
+                    <!-- Order Summary -->
+                    <div class="checkout-summary">
+                        <h2>Order Summary</h2>
+                        <div id="orderItemsSummary" class="order-items-summary"></div>
+                        
+                        <div class="summary-breakdown">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span id="checkoutSubtotal">₹0</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Shipping</span>
+                                <span id="checkoutShipping">₹0</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax</span>
+                                <span id="checkoutTax">₹0</span>
+                            </div>
+                            <div class="summary-divider"></div>
+                            <div class="summary-row total">
+                                <span>Total Amount</span>
+                                <span id="checkoutTotal">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery & Payment Details -->
+                    <div class="checkout-form">
+                        <!-- Delivery Information -->
+                        <div class="form-section">
+                            <h2>Delivery Information</h2>
+                            <form id="deliveryForm">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Delivery Address</label>
+                                    <textarea id="address" name="address" rows="3" required></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city">City</label>
+                                        <input type="text" id="city" name="city" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="state">State</label>
+                                        <input type="text" id="state" name="state" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="pincode">Pincode</label>
+                                        <input type="text" id="pincode" name="pincode" required>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Payment Section -->
+                        <div class="form-section">
+                            <h2>Payment Method</h2>
+                            <div class="payment-method">
+                                <p class="payment-info">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    </svg>
+                                    Secure payment powered by Razorpay
+                                </p>
+                                <button type="button" class="btn btn-primary btn-block" id="paymentBtn" onclick="initiatePayment()">
+                                    Pay ₹<span id="paymentAmount">0</span> with Razorpay
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="checkout-actions">
+                            <a href="cart.html" class="btn btn-secondary btn-block">
+                                Back to Cart
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 AgentCart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/payment.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+            
+            if (!isLoggedIn()) {
+                showToast('Please login to checkout', 'warning');
+                setTimeout(() => navigateTo('login.html'), 1000);
+                return;
+            }
+
+            initCheckout();
+        });
+
+        function initCheckout() {
+            const cart = getCart();
+            if (cart.length === 0) {
+                showToast('Your cart is empty', 'warning');
+                setTimeout(() => navigateTo('cart.html'), 1000);
+                return;
+            }
+
+            // Pre-fill user information
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('fullName').value = user.name || '';
+                document.getElementById('email').value = user.email || '';
+            }
+
+            // Display order summary
+            displayOrderSummary(cart);
+
+            // Get and display total amount
+            const orderTotal = sessionStorage.getItem('orderTotal') || '0';
+            document.getElementById('paymentAmount').textContent = orderTotal;
+        }
+
+        function displayOrderSummary(cart) {
+            const container = document.getElementById('orderItemsSummary');
+            container.innerHTML = '';
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const div = document.createElement('div');
+                div.className = 'order-item-summary';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">Product #${item.id}</span>
+                        <span class="item-quantity">Qty: ${item.quantity}</span>
+                    </div>
+                    <span class="item-price">₹${itemTotal.toLocaleString()}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            // Calculate and display summary
+            const subtotal = sessionStorage.getItem('orderSubtotal') || '0';
+            const total = sessionStorage.getItem('orderTotal') || '0';
+            const shipping = total - subtotal >= 50 ? 50 : 0;
+            const tax = total - subtotal - shipping;
+
+            document.getElementById('checkoutSubtotal').textContent = `₹${subtotal}`;
+            document.getElementById('checkoutShipping').textContent = shipping === 0 ? 'Free' : `₹${shipping}`;
+            document.getElementById('checkoutTax').textContent = `₹${tax}`;
+            document.getElementById('checkoutTotal').textContent = `₹${total}`;
+        }
+
+        async function initiatePayment() {
+            // Validate delivery form
+            const form = document.getElementById('deliveryForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const paymentBtn = document.getElementById('paymentBtn');
+            paymentBtn.disabled = true;
+            paymentBtn.textContent = 'Processing...';
+
+            try {
+                const orderTotal = sessionStorage.getItem('orderTotal') || '0';
+                const amountInPaise = Math.round(parseFloat(orderTotal) * 100);
+
+                // ADJUST ACCORDING TO ACTUAL BACKEND ENDPOINT
+                // Create order on backend
+                const orderResponse = await apiRequest('/api/orders/create-payment-order', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        amount: amountInPaise,
+                        currency: 'INR'
+                    })
+                });
+
+                // ADJUST ACCORDING TO ACTUAL BACKEND RESPONSE
+                // Expected: { orderId: "razorpay_order_id", key: "razorpay_key_id" }
+                
+                if (orderResponse.orderId && orderResponse.key) {
+                    openRazorpayCheckout(orderResponse.orderId, orderResponse.key, amountInPaise);
+                } else {
+                    throw new Error('Invalid payment order response');
+                }
+            } catch (error) {
+                console.error('Payment initiation error:', error);
+                showToast(error.message || 'Failed to initiate payment', 'error');
+            } finally {
+                paymentBtn.disabled = false;
+                paymentBtn.textContent = `Pay ₹${sessionStorage.getItem('orderTotal') || '0'} with Razorpay`;
+            }
+        }
+
+        function openRazorpayCheckout(razorpayOrderId, razorpayKeyId, amount) {
+            const user = getCurrentUser();
+            
+            const options = {
+                key: razorpayKeyId,
+                amount: amount,
+                currency: 'INR',
+                name: 'AgentCart',
+                description: 'Complete your purchase',
+                order_id: razorpayOrderId,
+                handler: async (response) => {
+                    await verifyPayment(response);
+                },
+                prefill: {
+                    name: user?.name || '',
+                    email: user?.email || document.getElementById('email').value,
+                    contact: document.getElementById('phone').value
+                },
+                theme: {
+                    color: '#0066cc'
+                },
+                modal: {
+                    ondismiss: function() {
+                        showToast('Payment cancelled', 'warning');
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        async function verifyPayment(response) {
+            try {
+                // Send payment verification request to backend
+                // ADJUST ACCORDING TO ACTUAL BACKEND ENDPOINT
+                const verificationResponse = await apiRequest('/api/orders/verify-payment', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    })
+                });
+
+                // ADJUST ACCORDING TO ACTUAL BACKEND RESPONSE
+                // Expected: { success: true, orderId: "order_id", message: "Payment verified" }
+
+                if (verificationResponse.success) {
+                    showToast('Payment successful!', 'success');
+                    localStorage.removeItem('cart');
+                    setTimeout(() => navigateTo('orders.html'), 1500);
+                } else {
+                    throw new Error('Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Payment verification error:', error);
+                showToast(error.message || 'Payment verification failed', 'error');
+            }
+        }
+
+        function getCart() {
+            const cart = localStorage.getItem('cart');
+            return cart ? JSON.parse(cart) : [];
+        }
+
+        function getCurrentUser() {
+            const user = localStorage.getItem('user');
+            return user ? JSON.parse(user) : null;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - AgentCart</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/products.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+    <!-- Navbar (loaded from common.js) -->
+    <nav id="navbar"></nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <main>
+        <section class="product-details-section">
+            <div class="container">
+                <!-- Back Button -->
+                <a href="products.html" class="back-button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back to Products
+                </a>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="product-details-loading" style="display: none;">
+                    <div class="skeleton-detail"></div>
+                </div>
+
+                <!-- Product Details -->
+                <div id="productDetails" class="product-details-container" style="display: none;">
+                    <div class="product-image-section">
+                        <div class="product-image-wrapper">
+                            <div id="productImage" class="product-image">
+                                <svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="50" y="50" width="300" height="300" rx="10"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-info-section">
+                        <div id="productContent"></div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="100" cy="100" r="80" opacity="0.2"/>
+                    </svg>
+                    <h2>Product Not Found</h2>
+                    <p>The product you're looking for doesn't exist or has been removed.</p>
+                    <a href="products.html" class="btn btn-primary">Back to Products</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 AgentCart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderNavbar();
+            
+            try {
+                // Get product ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+
+                if (!productId) {
+                    showEmptyState();
+                    return;
+                }
+
+                showLoadingState();
+                const product = await loadProductDetails(productId);
+                hideLoadingState();
+
+                if (product) {
+                    displayProductDetails(product);
+                    showProductDetails();
+                } else {
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error loading product details:', error);
+                hideLoadingState();
+                showEmptyState();
+                showToast('Failed to load product details', 'error');
+            }
+        });
+
+        async function loadProductDetails(productId) {
+            try {
+                // ADJUST ACCORDING TO ACTUAL BACKEND ENDPOINT
+                const product = await apiRequest(`/api/products/${productId}`);
+                return product;
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                throw error;
+            }
+        }
+
+        function displayProductDetails(product) {
+            // ADJUST FIELD NAMES ACCORDING TO ACTUAL BACKEND RESPONSE
+            const {
+                id = '',
+                name = 'Product Name',
+                price = 0,
+                description = '',
+                sellerName = 'Seller',
+                availability = 'In Stock',
+                category = 'Category',
+                stock = 0
+            } = product;
+
+            const productContent = document.getElementById('productContent');
+            
+            const html = `
+                <div class="product-header">
+                    <div class="product-category">${category}</div>
+                    <h1>${escapeHtml(name)}</h1>
+                </div>
+
+                <div class="product-seller">
+                    <span class="seller-label">Sold by</span>
+                    <span class="seller-name">${escapeHtml(sellerName)}</span>
+                </div>
+
+                <div class="product-price-section">
+                    <div class="price-display">
+                        <span class="price-currency">₹</span>
+                        <span class="price-amount">${price.toLocaleString()}</span>
+                    </div>
+                    <div class="product-availability">
+                        <span class="availability-badge ${availability.toLowerCase() === 'in stock' ? 'in-stock' : 'out-of-stock'}">
+                            ${availability}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="product-description">
+                    <h3>Description</h3>
+                    <p>${escapeHtml(description)}</p>
+                </div>
+
+                <div class="product-quantity">
+                    <label for="quantityInput">Quantity:</label>
+                    <div class="quantity-selector">
+                        <button class="qty-btn" onclick="decreaseQuantity()">−</button>
+                        <input type="number" id="quantityInput" value="1" min="1" max="${stock}" readonly>
+                        <button class="qty-btn" onclick="increaseQuantity(${stock})">+</button>
+                    </div>
+                    <span class="stock-info">${stock} available</span>
+                </div>
+
+                <div class="product-actions">
+                    <button class="btn btn-primary" onclick="handleAddToCart('${id}', ${price})">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        Add to Cart
+                    </button>
+                    <button class="btn btn-secondary" onclick="handleNegotiate('${id}', '${escapeHtml(name)}', ${price})">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Negotiate Price
+                    </button>
+                </div>
+            `;
+
+            productContent.innerHTML = html;
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantityInput');
+            if (input.value > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        function increaseQuantity(max) {
+            const input = document.getElementById('quantityInput');
+            if (parseInt(input.value) < max) {
+                input.value = parseInt(input.value) + 1;
+            }
+        }
+
+        function handleAddToCart(productId, price) {
+            if (!isLoggedIn()) {
+                showToast('Please login to add items to cart', 'warning');
+                setTimeout(() => navigateTo('login.html'), 1000);
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            const cart = getCart();
+            
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: productId,
+                    quantity: quantity,
+                    price: price
+                });
+            }
+
+            saveCart(cart);
+            showToast(`Added ${quantity} item(s) to cart`, 'success');
+        }
+
+        function handleNegotiate(productId, productName, originalPrice) {
+            if (!isLoggedIn()) {
+                showToast('Please login to negotiate', 'warning');
+                setTimeout(() => navigateTo('login.html'), 1000);
+                return;
+            }
+
+            // Store negotiation context in sessionStorage
+            sessionStorage.setItem('negotiationProductId', productId);
+            sessionStorage.setItem('negotiationProductName', productName);
+            sessionStorage.setItem('negotiationOriginalPrice', originalPrice);
+
+            navigateTo('negotiation.html');
+        }
+
+        function showLoadingState() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('productDetails').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function hideLoadingState() {
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        function showProductDetails() {
+            document.getElementById('productDetails').style.display = 'grid';
+        }
+
+        function showEmptyState() {
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('productDetails').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function getCart() {
+            const cart = localStorage.getItem('cart');
+            return cart ? JSON.parse(cart) : [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const cart = getCart();
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = totalItems;
+                badge.style.display = totalItems > 0 ? 'block' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

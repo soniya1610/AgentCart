@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentCart - Discover. Negotiate. Buy Smarter.</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+    <!-- Navbar (loaded from common.js) -->
+    <nav id="navbar"></nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <span class="hero-label">AI Growth & Agentic Commerce</span>
+                    <h1 class="hero-title">Discover. Negotiate. Buy Smarter.</h1>
+                    <p class="hero-description">
+                        Find products, negotiate directly with sellers, and complete secure payments — 
+                        all in one intelligent marketplace.
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="navigateTo('products.html')">
+                            Explore Products
+                        </button>
+                        <button class="btn btn-secondary" onclick="navigateTo('negotiation.html')">
+                            Start Negotiating
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-illustration">
+                        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Shopping bag -->
+                            <circle cx="200" cy="150" r="60" fill="none" stroke="var(--accent-blue)" stroke-width="2" opacity="0.3"/>
+                            <path d="M 170 150 Q 170 120 200 110 Q 230 120 230 150" fill="none" stroke="var(--accent-blue)" stroke-width="2.5"/>
+                            <rect x="160" y="150" width="80" height="80" rx="8" fill="none" stroke="var(--accent-blue)" stroke-width="2.5"/>
+                            
+                            <!-- Negotiation elements -->
+                            <circle cx="120" cy="280" r="35" fill="var(--accent-blue)" opacity="0.1"/>
+                            <circle cx="280" cy="280" r="35" fill="var(--accent-blue)" opacity="0.1"/>
+                            
+                            <!-- Connecting line -->
+                            <line x1="155" y1="280" x2="245" y2="280" stroke="var(--accent-blue)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.5"/>
+                            
+                            <!-- Price tags -->
+                            <g transform="translate(100, 240)">
+                                <rect width="40" height="30" rx="4" fill="var(--accent-blue)" opacity="0.2"/>
+                                <text x="20" y="20" text-anchor="middle" fill="var(--accent-blue)" font-size="12" font-weight="bold">$</text>
+                            </g>
+                            <g transform="translate(260, 240)">
+                                <rect width="40" height="30" rx="4" fill="var(--accent-blue)" opacity="0.2"/>
+                                <text x="20" y="20" text-anchor="middle" fill="var(--accent-blue)" font-size="12" font-weight="bold">$</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <h2>Why AgentCart?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 21H3V3h8V1H3a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-8h-2v8z"/>
+                                <rect x="3" y="3" width="8" height="8"/>
+                                <circle cx="17.5" cy="10.5" r="1.5"/>
+                            </svg>
+                        </div>
+                        <h3>Discover Products</h3>
+                        <p>Browse a curated collection of products from trusted sellers. Search, filter, and find exactly what you're looking for.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                        </div>
+                        <h3>Smart Negotiation</h3>
+                        <p>Negotiate directly with sellers through our intelligent marketplace. Get better prices through real-time communication.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h3>Secure Payments</h3>
+                        <p>Pay with confidence using Razorpay's secure payment gateway. Your transactions are protected and verified.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="how-it-works">
+            <div class="container">
+                <h2>How AgentCart Works</h2>
+                <div class="steps-grid">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Discover</h3>
+                        <p>Browse through our marketplace and find products that interest you.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Negotiate</h3>
+                        <p>Chat with sellers to negotiate the best possible price for your desired product.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Get Approval</h3>
+                        <p>Receive seller approval on your negotiated price before proceeding to payment.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Pay Securely</h3>
+                        <p>Complete your payment using Razorpay's secure and trusted payment platform.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <h3>Track Order</h3>
+                        <p>Monitor your order status in real-time from purchase to delivery.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Shop Smarter?</h2>
+                <p>Join thousands of smart shoppers who negotiate better deals on AgentCart</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="handleExploreClick()">
+                        Explore Products Now
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>AgentCart</h4>
+                    <p>Discover. Negotiate. Buy Smarter.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="orders.html">Orders</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AgentCart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/common.js"></script>
+	<script src="assets/js/api.js"></script>
+	<script src="assets/js/auth.js"></script>
+
+       <script>
+        function handleExploreClick() {
+            if (isLoggedIn()) {
+                navigateTo('products.html');
+            } else {
+                showToast('Please login to explore products', 'warning');
+                setTimeout(() => navigateTo('login.html'), 1000);
+            }
+        }
+
+        // Initialize navbar on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+        });
+    </script>
+</body>
+</html>

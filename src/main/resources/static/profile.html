@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AgentCart</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+    <!-- Navbar (loaded from common.js) -->
+    <nav id="navbar"></nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <main>
+        <section class="profile-section">
+            <div class="container">
+                <div class="section-header">
+                    <h1>Profile Settings</h1>
+                    <p>Manage your account information and preferences</p>
+                </div>
+
+                <!-- Profile Card -->
+                <div class="profile-container">
+                    <!-- Personal Information -->
+                    <div class="profile-card">
+                        <h2>Personal Information</h2>
+                        <form id="profileForm" class="profile-form">
+                            <div class="form-group">
+                                <label for="profileName">Full Name</label>
+                                <input type="text" id="profileName" name="name" disabled>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profileEmail">Email Address</label>
+                                <input type="email" id="profileEmail" name="email" disabled>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profileRole">Role</label>
+                                <input type="text" id="profileRole" name="role" disabled>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Account Settings -->
+                    <div class="profile-card">
+                        <h2>Account Settings</h2>
+                        
+                        <div class="settings-group">
+                            <h3>Theme Preference</h3>
+                            <div class="theme-selector">
+                                <label class="theme-option">
+                                    <input type="radio" name="theme" value="light" id="themeLight">
+                                    <span>Light</span>
+                                </label>
+                                <label class="theme-option">
+                                    <input type="radio" name="theme" value="dark" id="themeDark">
+                                    <span>Dark</span>
+                                </label>
+                                <label class="theme-option">
+                                    <input type="radio" name="theme" value="system" id="themeSystem">
+                                    <span>System</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Notifications</h3>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="orderNotifications" checked>
+                                    <span>Order Updates</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="negotiationNotifications" checked>
+                                    <span>Negotiation Responses</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="promotionalNotifications">
+                                    <span>Promotional Offers</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders Summary -->
+                    <div class="profile-card">
+                        <h2>Recent Orders</h2>
+                        <div id="recentOrders" class="recent-orders">
+                            <p class="loading-text">Loading orders...</p>
+                        </div>
+                        <a href="orders.html" class="btn btn-secondary btn-block">View All Orders</a>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="profile-card danger-zone">
+                        <h2>Account Management</h2>
+                        <div class="danger-actions">
+                            <p>Permanently delete your account and all associated data</p>
+                            <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Logout Button -->
+                    <div class="profile-actions">
+                        <button class="btn btn-primary btn-block" onclick="handleLogout()">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 AgentCart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+            
+            if (!isLoggedIn()) {
+                showToast('Please login to view profile', 'warning');
+                setTimeout(() => navigateTo('login.html'), 1000);
+                return;
+            }
+
+            loadProfileData();
+            setupThemeSelector();
+            loadRecentOrders();
+        });
+
+        function loadProfileData() {
+            const user = getCurrentUser();
+            
+            if (user) {
+                document.getElementById('profileName').value = user.name || '';
+                document.getElementById('profileEmail').value = user.email || '';
+                document.getElementById('profileRole').value = (user.role || 'user').toUpperCase();
+            }
+        }
+
+        function setupThemeSelector() {
+            const currentTheme = localStorage.getItem('theme') || 'system';
+            
+            // Set initial radio button
+            const themeRadio = document.querySelector(`input[name="theme"][value="${currentTheme}"]`);
+            if (themeRadio) {
+                themeRadio.checked = true;
+            }
+
+            // Add change listeners
+            document.querySelectorAll('input[name="theme"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    setTheme(e.target.value);
+                });
+            });
+        }
+
+        async function loadRecentOrders() {
+            try {
+                // ADJUST ACCORDING TO ACTUAL BACKEND ENDPOINT
+                const orders = await apiRequest('/api/orders/my-orders?limit=3');
+
+                const container = document.getElementById('recentOrders');
+                
+                if (orders && orders.length > 0) {
+                    let html = '<div class="orders-preview">';
+                    orders.slice(0, 3).forEach(order => {
+                        // ADJUST FIELD NAMES ACCORDING TO ACTUAL BACKEND RESPONSE
+                        const {
+                            id = '',
+                            orderDate = new Date().toISOString(),
+                            status = 'Pending',
+                            totalAmount = 0
+                        } = order;
+
+                        const date = new Date(orderDate).toLocaleDateString('en-IN');
+                        html += `
+                            <div class="order-preview-item">
+                                <div class="order-info">
+                                    <strong>Order #${escapeHtml(id)}</strong>
+                                    <small>${date}</small>
+                                </div>
+                                <div class="order-status">
+                                    <span class="status-badge ${getStatusClass(status)}">
+                                        ${escapeHtml(status)}
+                                    </span>
+                                    <span class="amount">₹${totalAmount.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="empty-message">No orders yet. <a href="products.html">Start shopping</a></p>';
+                }
+            } catch (error) {
+                console.error('Error loading recent orders:', error);
+                document.getElementById('recentOrders').innerHTML = '<p class="error-message">Failed to load orders</p>';
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                logout();
+                showToast('Logged out successfully', 'success');
+                setTimeout(() => navigateTo('index.html'), 500);
+            }
+        }
+
+        function confirmDeleteAccount() {
+            const confirmed = confirm('Are you sure? This action cannot be undone. All your data will be permanently deleted.');
+            
+            if (confirmed) {
+                const doubleConfirmed = prompt('Type "DELETE" to confirm account deletion:');
+                if (doubleConfirmed === 'DELETE') {
+                    deleteAccount();
+                }
+            }
+        }
+
+        async function deleteAccount() {
+            try {
+                // ADJUST ACCORDING TO ACTUAL BACKEND ENDPOINT
+                await apiRequest('/api/users/delete-account', {
+                    method: 'DELETE'
+                });
+
+                showToast('Account deleted successfully', 'success');
+                logout();
+                setTimeout(() => navigateTo('index.html'), 1500);
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                showToast(error.message || 'Failed to delete account', 'error');
+            }
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'status-pending',
+                'approved': 'status-approved',
+                'paid': 'status-paid',
+                'processing': 'status-processing',
+                'completed': 'status-completed',
+                'cancelled': 'status-cancelled'
+            };
+            return statusMap[status.toLowerCase()] || 'status-pending';
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function getCurrentUser() {
+            const user = localStorage.getItem('user');
+            return user ? JSON.parse(user) : null;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart');
+        }
+    </script>
+</body>
+</html>
